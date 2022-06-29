@@ -4,8 +4,6 @@ name: Deployment Master (Multisite) Workflow
 
 env:
   BRANCH: master
-  61fa6c15c224b80069c87998: "aurelian..kinsta.cloud"
-
 
 # Controls when the workflow will run
 on:
@@ -26,38 +24,56 @@ jobs:
             host: 34.77.168.230
             username: doctob2bfr
             password: AURELIAN_PWD
+            db_name: AURELIAN_DBNAME
+            db_user: AURELIAN_DBUSER
+            db_pass: AURELIAN_DBPASS
+            domain: AURELIAN_DOMAIN
             port: 57213
-          - name: Clemance Site
+          - name: CLEMENCE Site
             asignee_id: 61fa6c15c224b80069c879981
-            host: 34.77.168.230
-            username: doctob2bfr
-            password: CLEMANCE_PWD
-            port: 57213
+            host: 34.77.249.81
+            username: doctolibCLEMENCE
+            password: CLEMENCE_PWD
+            db_name: CLEMENCE_DBNAME
+            db_user: CLEMENCE_DBUSER
+            db_pass: CLEMENCE_DBPASS
+            domain: CLEMENCE_DOMAIN
+            port: 64827
           - name: Didier Site
             asignee_id: 61fa6c15c224b80069c879982
             host: 34.77.168.230
             username: doctob2bfr
             password: DIDIER_PWD
+            db_name: DIDIER_DBNAME
+            db_user: DIDIER_DBUSER
+            db_pass: DIDIER_DBPASS
+            domain: DIDIER_DOMAIN
             port: 57213
     steps:
-#      - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
+        if: ${{ matrix.sites.asignee_id == github.event.client_payload.assignee_id }}
+        with:
+          ref: ${{github.event.client_payload.branch_name}}
+      - name: "Running Build for Ticket: ${{ github.event.client_payload.jira_issue }} for ${{ github.event.client_payload.assignee_name }}"
+        if: ${{ matrix.sites.asignee_id == github.event.client_payload.assignee_id }}
+        run: echo "Branch Deployed -> ${{ (github.event.client_payload.branch_name == '' && 'staging') || github.event.client_payload.branch_name }}"
 #      - name: Setup Nodejs and npm
-#        if: matrix.asignee_id == ${{ github.event.client_payload.assignee_id }}
+#        if: ${{ matrix.sites.asignee_id == github.event.client_payload.assignee_id }}
 #        uses: actions/setup-node@v2
 #        with:
 #          node-version: "16"
 #      - name: Install dependencies
-#        if: matrix.asignee_id == ${{ github.event.client_payload.assignee_id }}
+#        if: ${{ matrix.sites.asignee_id == github.event.client_payload.assignee_id }}
 #        run: cd wp-content/themes/common && yarn
 #      - name: Build assets
-#        if: matrix.asignee_id == ${{ github.event.client_payload.assignee_id }}
+#        if: ${{ matrix.sites.asignee_id == github.event.client_payload.assignee_id }}
 #        run: cd wp-content/themes/common && yarn run prod
 #      - name: Check assets
-#        if: matrix.asignee_id == ${{ github.event.client_payload.assignee_id }}
+#        if: ${{ matrix.sites.asignee_id == github.event.client_payload.assignee_id }}
 #        run: cd wp-content/themes/common/dist && ls -l
 #      - name: Fetch Wordpress Core
 #        uses: appleboy/ssh-action@v0.1.4
-#        if: matrix.asignee_id == ${{ github.event.client_payload.assignee_id }}
+#        if: ${{ matrix.sites.asignee_id == github.event.client_payload.assignee_id }}
 #        with:
 #          host: ${{ matrix.sites.host }}
 #          username: ${{ matrix.sites.username }}
@@ -69,27 +85,25 @@ jobs:
 #            curl -O https://wordpress.org/wordpress-${{ secrets.WP_VERSION }}.zip
 #            unzip wordpress-${{ secrets.WP_VERSION }}.zip
 #            mv ./wordpress/* ./ && rm -rf wordpress-${{ secrets.WP_VERSION }}.zip && rm -rf ./wordpress
-      - name: Print Variables
-        run: echo "${{ github.event.client_payload.assignee_id }}"
       - name: Write wp-config.php (Private)
-        if: matrix.asignee_id == ${{ github.event.client_payload.assignee_id }}
         shell: bash
+        if: ${{ matrix.sites.asignee_id == github.event.client_payload.assignee_id }}
         run: |
-          chmod +x .github/scripts/create_config.sh
-          dbname='${{ secrets.DBNAME }}'
-          dbuser='${{ secrets.DBUSER }}'
-          dbpass='${{ secrets.DBPASS }}'
+          chmod +x  ./.github/scripts/create_config.sh
+          dbname='${{ secrets[matrix.sites.db_name] }}'
+          dbuser='${{ secrets[matrix.sites.db_user] }}'
+          dbpass='${{ secrets[matrix.sites.db_pass] }}'
           cachekeysalt='${{ secrets.CACHE_KEY_SALT }}'
-          domain='${{ secrets.DOMAIN_CURRENT_SITE }}'
+          domain='${{ secrets[matrix.sites.domain] }}'
           prospect='${{ secrets.PROSPECT_SECRET }}'
           s3key='${{ secrets.S3UPLOADSKEY }}'
           s3secret='${{ secrets.S3UPLOADSSECRET }}'
-          ../scripts/create_config.sh "${dbname}" "${dbuser}" "${dbpass}" "${cachekeysalt}" "${domain}" "${prospect}" "${s3key}" "${s3secret}"
+          ./.github/scripts/create_config.sh "${dbname}" "${dbuser}" "${dbpass}" "${cachekeysalt}" "${domain}" "${prospect}" "${s3key}" "${s3secret}"
           ls -la
           cat wp-config.php
 #      - name: Fetch Project from GIT (Private)
 #        uses: appleboy/ssh-action@v0.1.4
-#        if: matrix.asignee_id == ${{ github.event.client_payload.assignee_id }}
+#        if: ${{ matrix.sites.asignee_id == github.event.client_payload.assignee_id }}
 #        with:
 #          host: ${{ matrix.sites.host }}
 #          username: ${{ matrix.sites.username }}
@@ -106,7 +120,7 @@ jobs:
 #            cd ../ && rm -rf project
 #      - name: Copy assets folder on Multisite (Private)
 #        uses: garygrossgarten/github-action-scp@v0.7.3
-#        if: matrix.asignee_id == ${{ github.event.client_payload.assignee_id }}
+#        if: ${{ matrix.sites.asignee_id == github.event.client_payload.assignee_id }}
 #        with:
 #          local: wp-content/themes/common/dist
 #          remote: private/wp-content/themes/common/dist
@@ -116,7 +130,7 @@ jobs:
 #          port: ${{ matrix.sites.port }}
 #      - name: Copy wp-config.php (Private)
 #        uses: garygrossgarten/github-action-scp@v0.7.3
-#        if: matrix.asignee_id == ${{ github.event.client_payload.assignee_id }}
+#        if: ${{ matrix.sites.asignee_id == github.event.client_payload.assignee_id }}
 #        with:
 #          local: "wp-config.php"
 #          remote: "private/wp-config.php"
@@ -126,7 +140,7 @@ jobs:
 #          port: ${{ matrix.sites.port }}
 #      - name: Move to public (Private)
 #        uses: appleboy/ssh-action@v0.1.4
-#        if: matrix.asignee_id == ${{ github.event.client_payload.assignee_id }}
+#        if: ${{ matrix.sites.asignee_id == github.event.client_payload.assignee_id }}
 #        with:
 #          host: ${{ matrix.sites.host }}
 #          username: ${{ matrix.sites.username }}
