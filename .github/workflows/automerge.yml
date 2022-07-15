@@ -16,8 +16,8 @@ jobs:
         with:
           token: ${{ secrets.MY_GITHUB_TOKEN }}
           fetch-depth: 0
-      - uses: reitermarkus/automerge@v2
+      - uses: peter-evans/enable-pull-request-automerge@v2
         with:
           token: ${{ secrets.MY_GITHUB_TOKEN }}
           merge-method: squash
-          pull-request: ${{ github.event.client_payload.pull_request }}
+          pull-request-number: ${{ github.event.client_payload.pull_request }}
