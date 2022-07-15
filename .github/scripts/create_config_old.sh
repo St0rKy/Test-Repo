@@ -4,7 +4,7 @@ WPSalts=$(wget https://api.wordpress.org/secret-key/1.1/salt/ -q -O -)
 cat <<EOF > wp-config.php
 <?php
 /**
-* The base configuration for WordPress
+* The base configuration for WordPress (some changes)
 *
 * The wp-config.php creation script uses this file during the installation.
 * You don't have to use the web site, you can copy this file to "wp-config.php"
