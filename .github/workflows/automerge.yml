@@ -1,0 +1,26 @@
+name: Automerge For Tasks Dragged in DONE in JIRA
+
+# Controls when the workflow will run
+on:
+  repository_dispatch:
+    # this is the event_type passed in from the webhook, needs to match exactly what was defined in the webhook custom data payload
+    types: [event-task-done]
+
+jobs:
+  build:
+    name: Auto Merge Branch
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{github.event.client_payload.branch_name}}
+      - name: Set Git config
+        run: |
+          git config --local user.email "actions@github.com"
+          git config --local user.name "Github Actions"
+      - name: Merge Branch Into staging
+        run: |
+          git rebase staging
+          git push origin --force
+          git checkout staging
+          git merge --squash --ff-only ${{github.event.client_payload.branch_name}}
