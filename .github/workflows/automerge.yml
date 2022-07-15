@@ -11,8 +11,11 @@ jobs:
     name: Auto Merge Branch
     runs-on: ubuntu-latest
     steps:
+      - uses: Label305/AutoRebase@v0.1
+        with:
+          github_token: ${{ secrets.MY_GITHUB_TOKEN }}
       - uses: reitermarkus/automerge@v2
         with:
           token: ${{ secrets.MY_GITHUB_TOKEN }}
-          merge-method: rebase
+          merge-method: squash
           pull-request: ${{ github.event.client_payload.pull_request }}
