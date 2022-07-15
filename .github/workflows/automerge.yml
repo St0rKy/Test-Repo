@@ -23,4 +23,5 @@ jobs:
           git rebase staging
           git push origin --force
           git checkout staging
+          git pull
           git merge --squash --ff-only ${{github.event.client_payload.branch_name}}
