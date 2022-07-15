@@ -2,7 +2,7 @@ name: Run actionlint
 
 on:
   pull_request:
-    branches: [master]
+    branches: [*]
     paths:
       - ".github/workflows/*"
 
