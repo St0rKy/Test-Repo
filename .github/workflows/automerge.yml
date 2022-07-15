@@ -14,5 +14,5 @@ jobs:
       - uses: reitermarkus/automerge@v2
         with:
           token: ${{ secrets.MY_GITHUB_TOKEN }}
-          merge-method: squash
+          merge-method: rebase
           pull-request: ${{ github.event.client_payload.pull_request }}
