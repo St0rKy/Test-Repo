@@ -11,17 +11,8 @@ jobs:
     name: Auto Merge Branch
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: reitermarkus/automerge@v2
         with:
-          ref: ${{github.event.client_payload.branch_name}}
-      - name: Set Git config
-        run: |
-          git config --local user.email "actions@github.com"
-          git config --local user.name "Github Actions"
-      - name: Merge Branch Into staging
-        run: |
-          git rebase staging
-          git push origin --force
-          git checkout staging
-          git pull
-          git merge --squash --ff-only ${{github.event.client_payload.branch_name}}
+          token: ${{ secrets.MY_GITHUB_TOKEN }}
+          merge-method: squash
+          pull-request: ${{ github.event.client_payload.pull_request }}
