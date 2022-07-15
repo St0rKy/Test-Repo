@@ -17,10 +17,9 @@ jobs:
           token: ${{ secrets.MY_GITHUB_TOKEN }}
           fetch-depth: 0
       - name: Automatic Rebase
-        uses: cirrus-actions/rebase@1.5
-        env:
-          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
-          PR_NUMBER: ${{ github.event.client_payload.pull_request }}
+        uses: peter-evans/rebase@v2
+        with:
+          token: ${{ secrets.MY_GITHUB_TOKEN }}
       - uses: peter-evans/enable-pull-request-automerge@v2
         with:
           token: ${{ secrets.MY_GITHUB_TOKEN }}
