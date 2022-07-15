@@ -16,13 +16,21 @@ jobs:
         with:
           token: ${{ secrets.MY_GITHUB_TOKEN }}
           fetch-depth: 0
+      - name: Set env
+        run: |
+          PR=${{ github.event.client_payload.pull_request }}
+          echo "PULL_REQ_NR=$(echo ${PR:1})" >> $GITHUB_ENV
       - name: Automatic Rebase
-        uses: cirrus-actions/rebase@1.5
-        env:
-          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
-          PR_NUMBER: ${{ github.event.client_payload.pull_request }}
+        uses: peter-evans/rebase@v2
+        with:
+          token: ${{ secrets.MY_GITHUB_TOKEN }}
+          base: staging
+          head: St0rKy:${{ github.event.client_payload.branch_name }}
       - uses: peter-evans/enable-pull-request-automerge@v2
         with:
           token: ${{ secrets.MY_GITHUB_TOKEN }}
           merge-method: squash
-          pull-request-number: ${{ github.event.client_payload.pull_request }}
+          pull-request-number: ${{ env.PULL_REQ_NR }}
+
+
+
