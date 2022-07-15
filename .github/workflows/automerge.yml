@@ -27,7 +27,7 @@ jobs:
           token: ${{ secrets.MY_GITHUB_TOKEN }}
           base: main
           head: St0rKy:${{ github.event.client_payload.branch_name }}
-      -name: Automatic Merge
+      - name: Automatic Merge
         uses: peter-evans/enable-pull-request-automerge@v2
         with:
           token: ${{ secrets.MY_GITHUB_TOKEN }}
@@ -36,7 +36,7 @@ jobs:
       - name: Rebase Fail
         if: always() && (steps.rebase.outcome == 'failure')
         uses: rtCamp/action-slack-notify@v2
-          env:
-            SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-            SLACK_MESSAGE: "REBASE FOR PULL REQUEST NR ${{env.PULL_REQ_NR}} FAILED"
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_MESSAGE: "REBASE FOR PULL REQUEST NR ${{env.PULL_REQ_NR}} FAILED"
 
