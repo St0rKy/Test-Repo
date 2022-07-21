@@ -20,30 +20,25 @@ jobs:
         run: |
           PR=${{ github.event.client_payload.pull_request }}
           echo "PULL_REQ_NR=$(echo ${PR:1})" >> $GITHUB_ENV
-      - name: Automatic Rebase
-        uses: peter-evans/rebase@v2
-        with:
-          token: ${{ secrets.MY_GITHUB_TOKEN }}
-          base: main
-          head: St0rKy:${{ github.event.client_payload.branch_name }}
-      - name: Rebase Check
+      - name: Automatic Rebase && Rebase Check
         id: rebase
         run: |
           git checkout ${{ github.event.client_payload.branch_name }}
           git pull
-          git rebase main && (exit 0) || (git rebase --abort && exit 1)
+          git rebase main && (git push --force && exit 0) || (git rebase --abort && exit 1)
       - name: Rebase Fail
         if: always() && (steps.rebase.outcome == 'failure')
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-          SLACK_MESSAGE: "REBASE FOR PULL REQUEST NR ${{env.PULL_REQ_NR}} FAILED"
-      - name: Automatic Merge
-        if: always() && (steps.rebase.outcome == 'success')
-        uses: peter-evans/enable-pull-request-automerge@v2
-        with:
-          token: ${{ secrets.MY_GITHUB_TOKEN }}
-          merge-method: squash
-          pull-request-number: ${{ env.PULL_REQ_NR }}
+          SLACK_MESSAGE: "REBASE FOR PULL REQUEST ${{ github.event.client_payload.pull_request_url }} FAILED (most probably because of conflicts). 
+          This PR should be rebased and squash merged manually"
+#      - name: Automatic Merge
+#        if: always() && (steps.rebase.outcome == 'success')
+#        uses: peter-evans/enable-pull-request-automerge@v2
+#        with:
+#          token: ${{ secrets.MY_GITHUB_TOKEN }}
+#          merge-method: squash
+#          pull-request-number: ${{ env.PULL_REQ_NR }}
 
 
